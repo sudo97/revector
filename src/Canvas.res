@@ -86,6 +86,7 @@ let make = (~params) => {
   })
 
   let onMouseMove = React.useCallback0((e: ReactEvent.Mouse.t) => {
+    e->ReactEvent.Mouse.preventDefault
     let target = e->ReactEvent.Mouse.target
     let currentTarget = e->ReactEvent.Mouse.currentTarget
     if target === currentTarget {
@@ -132,11 +133,12 @@ let make = (~params) => {
         ~height=`${height}px`,
         ~borderColor="black",
         ~border="solid",
+        ~overflow="hidden",
         (),
       )}>
       {svgContent}
     </div>
-    <div className="bg-gray-300 mx-10 flex-column">
+    <div className="bg-gray-300 mx-10 flex-column w-80">
       <div className="font-mono text-justify"> {svgxml->React.string} </div>
     </div>
     <div>
