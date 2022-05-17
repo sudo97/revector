@@ -1,5 +1,7 @@
 type canvasParams = {width: int, height: int}
 
+type coords = (int, int)
+
 module Shapes = {
   type circle = {x: int, y: int, r: int}
   type variant = Circle(circle)
@@ -9,7 +11,7 @@ module Shapes = {
   }
 }
 
-type action = StartDrawing(int, int) | KeepDrawing(int, int) | EndDrawing | Edit(int)
+type action = StartDrawing(coords) | KeepDrawing(coords) | EndDrawing | Edit(int)
 type canvasState = {
   shapes: array<Shapes.t>,
   shapeToDraw: option<Shapes.variant>,
@@ -63,6 +65,16 @@ let reducer = (currState: canvasState, action: action) =>
   | _ => currState
   }
 
+let getCoords = (e: ReactEvent.Mouse.t) => {
+  let target = e->ReactEvent.Mouse.target
+  let rect = target["getBoundingClientRect"](.)
+  let clientX = e->ReactEvent.Mouse.clientX
+  let x = clientX - rect["left"]
+  let clientY = e->ReactEvent.Mouse.clientY
+  let y = clientY - rect["top"]
+  (x, y)
+}
+
 @react.component
 let make = (~params) => {
   let (width, height) = React.useMemo(
@@ -75,27 +87,13 @@ let make = (~params) => {
     {shapes: [], shapeToDraw: None, shapeCreator: Shapes.createCircle},
   )
 
-  let onMouseDown = React.useCallback0((e: ReactEvent.Mouse.t) => {
-    let target = e->ReactEvent.Mouse.target
-    let rect = target["getBoundingClientRect"](.)
-    let clientX = e->ReactEvent.Mouse.clientX
-    let x = clientX - rect["left"]
-    let clientY = e->ReactEvent.Mouse.clientY
-    let y = clientY - rect["top"]
-    dispatch(StartDrawing(x, y))
-  })
+  let onMouseDown = React.useCallback0(e => e->getCoords->StartDrawing->dispatch)
 
   let onMouseMove = React.useCallback0((e: ReactEvent.Mouse.t) => {
-    e->ReactEvent.Mouse.preventDefault
     let target = e->ReactEvent.Mouse.target
     let currentTarget = e->ReactEvent.Mouse.currentTarget
     if target === currentTarget {
-      let rect = target["getBoundingClientRect"](.)
-      let clientX = e->ReactEvent.Mouse.clientX
-      let x = clientX - rect["left"]
-      let clientY = e->ReactEvent.Mouse.clientY
-      let y = clientY - rect["top"]
-      dispatch(KeepDrawing(x, y))
+      e->getCoords->KeepDrawing->dispatch
     }
   })
 
