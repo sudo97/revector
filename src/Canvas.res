@@ -42,16 +42,17 @@ let calcDistance = (x, x', y, y') => {
 
 let idGen = ref(0)
 
+let updShape = (x', y', s: Shapes.variant) =>
+  switch s {
+  | Circle({x, y}) => Shapes.Circle({x: x, y: y, r: calcDistance(x, x', y, y')})
+  }
+
 let reducer = (currState: canvasState, action: action) =>
   switch action {
   | StartDrawing(x, y) => {...currState, shapeToDraw: Some(currState.shapeCreator(x, y))}
   | KeepDrawing(x', y') => {
       ...currState,
-      shapeToDraw: currState.shapeToDraw->Belt.Option.map((Circle({x, y})) => Shapes.Circle({
-        x: x,
-        y: y,
-        r: calcDistance(x, x', y, y'),
-      })),
+      shapeToDraw: currState.shapeToDraw->Belt.Option.map(updShape(x', y')),
     }
   | EndDrawing =>
     switch currState.shapeToDraw {
