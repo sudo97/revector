@@ -22,8 +22,8 @@ module Input = {
 }
 @react.component
 let make = (~setCanvasParams: (int, int) => unit) => {
-  let (width, setWidth) = React.useState(_ => 100)
-  let (height, setHeight) = React.useState(_ => 100)
+  let (width, setWidth) = React.useState(_ => 500)
+  let (height, setHeight) = React.useState(_ => 500)
   <div className="relative z-10" role="dialog">
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
     <div className="fixed z-10 inset-0 overflow-y-auto">
