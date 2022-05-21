@@ -15,23 +15,20 @@ type mode = Create(coords => Shapes.t)
 type state = {
   shapes: array<Shapes.t>,
   shapeToDraw: option<Shapes.id>,
-  mode: mode,
 }
 
 let defaultState: state = {
   shapes: [],
   shapeToDraw: None,
-  mode: Create(Shapes.createCircle),
 }
 
-let reducer = (currState: state, action: mouseAction) => {
+let reducer = (mode, currState: state, action: mouseAction) => {
   switch action {
   | Start(x, y) =>
-    switch currState.mode {
+    switch mode {
     | Create(constructor) => {
         let shape = (x, y)->constructor
         {
-          ...currState,
           shapes: currState.shapes->Js.Array2.concat([shape]),
           shapeToDraw: Some(shape.id),
         }
@@ -40,7 +37,7 @@ let reducer = (currState: state, action: mouseAction) => {
   | Move(x, y) =>
     switch currState.shapeToDraw {
     | Some(id) =>
-      switch currState.mode {
+      switch mode {
       | Create(_) => {
           ...currState,
           shapes: currState.shapes->Js.Array2.map(item => {
@@ -55,7 +52,7 @@ let reducer = (currState: state, action: mouseAction) => {
     | _ => currState
     }
   | Release =>
-    switch currState.mode {
+    switch mode {
     | Create(_) => {...currState, shapeToDraw: None}
     }
   | _ => currState
@@ -63,8 +60,8 @@ let reducer = (currState: state, action: mouseAction) => {
 }
 
 @react.component
-let make = (~width: string, ~height: string) => {
-  let (state, dispatch) = React.useReducer(reducer, defaultState)
+let make = (~width: string, ~height: string, ~mode) => {
+  let (state, dispatch) = React.useReducer(reducer(mode), defaultState)
 
   let onMouseDown = React.useCallback0(e => e->getCoords->Start->dispatch)
   let onMouseMove = React.useCallback0((e: ReactEvent.Mouse.t) => e->getCoords->Move->dispatch)

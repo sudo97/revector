@@ -9,7 +9,7 @@ let make = (~params) => {
     [params.width, params.height],
   )
 
-  let svgContent = <SVGImage width height />
+  let svgContent = <SVGImage width height mode={SVGImage.Create(Shapes.createCircle)} />
 
   <div className="flex flex-row">
     <div
