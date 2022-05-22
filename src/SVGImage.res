@@ -11,15 +11,17 @@ let getCoords = (e: ReactEvent.Mouse.t) => {
 type coords = (int, int)
 
 type mouseAction = Start(coords) | Move(coords) | Release | Click(Shapes.id)
-type mode = Create(coords => Shapes.t)
+
+type mode = Create(coords => Shapes.t) | Selection
+
 type state = {
   shapes: array<Shapes.t>,
-  shapeToDraw: option<Shapes.id>,
+  activeShapeId: option<Shapes.id>,
 }
 
 let defaultState: state = {
   shapes: [],
-  shapeToDraw: None,
+  activeShapeId: None,
 }
 
 let reducer = (mode, currState: state, action: mouseAction) => {
@@ -30,12 +32,13 @@ let reducer = (mode, currState: state, action: mouseAction) => {
         let shape = (x, y)->constructor
         {
           shapes: currState.shapes->Js.Array2.concat([shape]),
-          shapeToDraw: Some(shape.id),
+          activeShapeId: Some(shape.id),
         }
       }
+    | Selection => failwith("Not implemented")
     }
   | Move(x, y) =>
-    switch currState.shapeToDraw {
+    switch currState.activeShapeId {
     | Some(id) =>
       switch mode {
       | Create(_) => {
@@ -48,12 +51,14 @@ let reducer = (mode, currState: state, action: mouseAction) => {
             }
           }),
         }
+      | Selection => failwith("Not implemented")
       }
     | _ => currState
     }
   | Release =>
     switch mode {
-    | Create(_) => {...currState, shapeToDraw: None}
+    | Create(_) => {...currState, activeShapeId: None}
+    | Selection => failwith("Not implemented")
     }
   | _ => currState
   }
@@ -78,16 +83,19 @@ let make = (~width: string, ~height: string, ~mode) => {
     onMouseMove
     onMouseUp>
     {state.shapes
-    ->Js.Array2.map(({id, shape: Circle(circle)}) =>
-      <Shapes.Circle
-        key={id->Belt.Int.toString}
-        circle
-        isSelected={switch state.shapeToDraw {
-        | Some(id') => id == id'
-        | _ => false
-        }}
-      />
-    )
+    ->Js.Array2.map(({id, shape}) => {
+      let key = id->Belt.Int.toString
+      switch shape {
+      | MonoVec(data, label) =>
+        switch label {
+        | #circle => <Shapes.Circle key data />
+        | #ellipse => <Shapes.Ellipse key data />
+        | #line => <Shapes.Line key data />
+        | #rect => <Shapes.Rect key data />
+        }
+      | _ => failwith("Not implemented")
+      }
+    })
     ->React.array}
   </svg>
 }

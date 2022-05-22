@@ -9,9 +9,27 @@ let make = (~params) => {
     [params.width, params.height],
   )
 
-  let svgContent = <SVGImage width height mode={SVGImage.Create(Shapes.createCircle)} />
+  let (mode, setMode) = React.useState(_ => SVGImage.Create(Shapes.createCircle))
 
-  <div className="flex flex-row">
+  let setCreator = React.useCallback0((c, _) => setMode(_ => SVGImage.Create(c)))
+
+  let svgContent = <SVGImage width height mode />
+
+  <div className="flex flex-column">
+    <div>
+      <button className="bg-blue" onClick={setCreator(Shapes.createRect)}>
+        {"Rect"->React.string}
+      </button>
+      <button className="bg-blue" onClick={setCreator(Shapes.createCircle)}>
+        {"Circle"->React.string}
+      </button>
+      <button className="bg-blue" onClick={setCreator(Shapes.createEllipse)}>
+        {"Ellipse"->React.string}
+      </button>
+      <button className="bg-blue" onClick={setCreator(Shapes.createLine)}>
+        {"Line"->React.string}
+      </button>
+    </div>
     <div
       style={ReactDOMStyle.make(
         ~width=`${width}px`,
