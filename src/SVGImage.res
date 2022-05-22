@@ -41,7 +41,9 @@ let make = (
         | #line => <Shapes.Line key data />
         | #rect => <Shapes.Rect key data />
         }
-      | _ => failwith("Not implemented")
+      | PolyVec(data, #polyline) => <Shapes.Polyline data key />
+      | PolyVec(_, #polygon) => failwith("Not implemented")
+      | Path => failwith("Not implemented")
       }
     })
     ->React.array}
