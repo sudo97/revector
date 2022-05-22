@@ -143,26 +143,52 @@ let make = (~params) => {
   let svgContent = <SVGImage width height onMouseDown onMouseMove onMouseUp shapes=state.shapes />
 
   <div className="flex">
-    <div>
-      <div>
-        <button className="block" onClick={_ => dispatch(ChangeCurrFigure(#rect))}>
-          {"Rect"->React.string}
-        </button>
-        <button className="block" onClick={_ => dispatch(ChangeCurrFigure(#circle))}>
-          {"Circle"->React.string}
-        </button>
-        <button className="block" onClick={_ => dispatch(ChangeCurrFigure(#ellipse))}>
-          {"Ellipse"->React.string}
-        </button>
-        <button className="block" onClick={_ => dispatch(ChangeCurrFigure(#line))}>
-          {"Line"->React.string}
-        </button>
-      </div>
-      <div>
-        <button className="block" onClick={_ => dispatch(ChangeCurrFigure(#polyline))}>
-          {"Polyline"->React.string}
-        </button>
-      </div>
+    <div className="flex-col">
+      <button
+        className={[
+          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
+          ("bg-green-500 hover:bg-green-700", state.currFigure == #rect),
+          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #rect),
+        ]->Utils.className}
+        onClick={_ => dispatch(ChangeCurrFigure(#rect))}>
+        {"Rect"->React.string}
+      </button>
+      <button
+        className={[
+          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
+          ("bg-green-500 hover:bg-green-700", state.currFigure == #circle),
+          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #circle),
+        ]->Utils.className}
+        onClick={_ => dispatch(ChangeCurrFigure(#circle))}>
+        {"Circle"->React.string}
+      </button>
+      <button
+        className={[
+          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
+          ("bg-green-500 hover:bg-green-700", state.currFigure == #ellipse),
+          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #ellipse),
+        ]->Utils.className}
+        onClick={_ => dispatch(ChangeCurrFigure(#ellipse))}>
+        {"Ellipse"->React.string}
+      </button>
+      <button
+        className={[
+          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
+          ("bg-green-500 hover:bg-green-700", state.currFigure == #line),
+          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #line),
+        ]->Utils.className}
+        onClick={_ => dispatch(ChangeCurrFigure(#line))}>
+        {"Line"->React.string}
+      </button>
+      <button
+        className={[
+          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
+          ("bg-green-500 hover:bg-green-700", state.currFigure == #polyline),
+          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #polyline),
+        ]->Utils.className}
+        onClick={_ => dispatch(ChangeCurrFigure(#polyline))}>
+        {"Polyline"->React.string}
+      </button>
     </div>
     <div
       style={ReactDOMStyle.make(
