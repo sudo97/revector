@@ -17,9 +17,9 @@ let make = (
   ~onMouseUp,
   ~shapes: array<Shapes.t>,
 ) => {
-  let onMouseDown' = React.useCallback0(e => e->getCoords->onMouseDown)
-  let onMouseMove' = React.useCallback0(e => e->getCoords->onMouseMove)
-  let onMouseUp' = React.useCallback0(e => e->getCoords->onMouseUp)
+  let onMouseDown' = React.useCallback1(e => e->getCoords->onMouseDown, [onMouseDown])
+  let onMouseMove' = React.useCallback1(e => e->getCoords->onMouseMove, [onMouseMove])
+  let onMouseUp' = React.useCallback1(e => e->getCoords->onMouseUp, [onMouseUp])
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width
