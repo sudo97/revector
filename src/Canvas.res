@@ -4,7 +4,7 @@ type canvasParams = {width: int, height: int}
 
 type coords = (int, int)
 
-type mode = Idle | Create | Selection
+type mode = Idle | Create(Shapes.id) | Selection(Shapes.id)
 
 type figure = [#circle | #rect | #ellipse | #line | #polyline | #polygon]
 
@@ -18,14 +18,12 @@ type action =
 
 type state = {
   shapes: array<Shapes.t>,
-  activeShapeId: option<Shapes.id>,
   mode: mode,
   currFigure: figure,
 }
 
 let defaultState: state = {
   shapes: [],
-  activeShapeId: None,
   mode: Idle,
   currFigure: #circle,
 }
@@ -50,14 +48,13 @@ let reducer = (currState: state, action: action) => {
         let shape = (x, y)->constructor(currFigure)
         {
           ...currState,
-          mode: Create,
+          mode: Create(shape.id),
           shapes: currState.shapes->Js.Array2.concat([shape]),
-          activeShapeId: Some(shape.id),
         }
       }
-    | Create =>
-      switch (currFigure, currState.activeShapeId) {
-      | (#polyline, Some(id)) => {
+    | Create(id) =>
+      switch currFigure {
+      | #polyline => {
           ...currState,
           shapes: currState.shapes->Js.Array2.map(item => {
             if item.id == id {
@@ -69,13 +66,13 @@ let reducer = (currState: state, action: action) => {
         }
       | _ => currState
       }
-    | Selection => failwith("Not implemented")
+    | Selection(_) => failwith("Not implemented")
     }
   | Move(x, y) =>
-    switch currState.activeShapeId {
-    | Some(id) =>
-      switch (mode, currFigure) {
-      | (Create, #polyline) => {
+    switch mode {
+    | Create(id) =>
+      switch currFigure {
+      | #polyline => {
           ...currState,
           shapes: currState.shapes->Js.Array2.map(item => {
             if item.id == id {
@@ -85,7 +82,7 @@ let reducer = (currState: state, action: action) => {
             }
           }),
         }
-      | (Create, _) => {
+      | _ => {
           ...currState,
           shapes: currState.shapes->Js.Array2.map(item => {
             if item.id == id {
@@ -95,38 +92,36 @@ let reducer = (currState: state, action: action) => {
             }
           }),
         }
-      | (Idle, _) => currState
-      | (Selection, _) => failwith("Not implemented")
       }
-    | None => currState
+    | Idle => currState
+    | Selection(_) => failwith("Not implemented")
     }
   | Release =>
     switch (mode, currFigure) {
-    | (Create, #polyline) => currState
-    | (Create, _) => {...currState, activeShapeId: None, mode: Idle}
+    | (Create(_), #polyline) => currState
+    | (Create(_), _) => {...currState, mode: Idle}
     | (Idle, _) => currState
-    | (Selection, _) => failwith("Not implemented")
+    | (Selection(_), _) => failwith("Not implemented")
     }
   | ChangeMode(mode) => {...currState, mode: mode}
   | ChangeCurrFigure(currFigure) => {...currState, currFigure: currFigure}
   | EndCreation =>
-    switch currFigure {
-    | #polyline => {
+    switch (mode, currFigure) {
+    | (Create(asid), #polyline) => {
         ...currState,
-        shapes: currState.shapes->Js.Array2.map((shape: Shapes.t): Shapes.t => {
-          let {id} = shape
-          switch (currState.activeShapeId, shape.shape) {
-          | (Some(asid), PolyVec(arr, fig)) if id == asid => {
+        shapes: currState.shapes->Js.Array2.map((item: Shapes.t): Shapes.t => {
+          let {id} = item
+          switch item.shape {
+          | PolyVec(arr, fig) if id == asid => {
               let arr = arr->Js.Array2.slice(~start=0, ~end_=arr->Js.Array2.length - 1)
               {id: id, shape: PolyVec(arr, fig)}
             }
-          | _ => shape
+          | _ => item
           }
         }),
-        activeShapeId: None,
         mode: Idle,
       }
-    | _ => {...currState, activeShapeId: None, mode: Idle}
+    | _ => {...currState, mode: Idle}
     }
   }
 }
