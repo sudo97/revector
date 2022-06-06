@@ -109,7 +109,25 @@ let reducer = (currState: state, action: action) => {
     }
   | ChangeMode(mode) => {...currState, mode: mode}
   | ChangeCurrFigure(currFigure) => {...currState, currFigure: currFigure}
-  | EndCreation => {...currState, activeShapeId: None, mode: Idle}
+  | EndCreation =>
+    switch currFigure {
+    | #polyline => {
+        ...currState,
+        shapes: currState.shapes->Js.Array2.map((shape: Shapes.t): Shapes.t => {
+          let {id} = shape
+          switch (currState.activeShapeId, shape.shape) {
+          | (Some(asid), PolyVec(arr, fig)) if id == asid => {
+              let arr = arr->Js.Array2.slice(~start=0, ~end_=arr->Js.Array2.length - 1)
+              {id: id, shape: PolyVec(arr, fig)}
+            }
+          | _ => shape
+          }
+        }),
+        activeShapeId: None,
+        mode: Idle,
+      }
+    | _ => {...currState, activeShapeId: None, mode: Idle}
+    }
   }
 }
 
