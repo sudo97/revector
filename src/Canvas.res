@@ -144,51 +144,31 @@ let make = (~params) => {
 
   <div className="flex">
     <div className="flex-col">
-      <button
-        className={[
-          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
-          ("bg-green-500 hover:bg-green-700", state.currFigure == #rect),
-          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #rect),
-        ]->Utils.className}
-        onClick={_ => dispatch(ChangeCurrFigure(#rect))}>
-        {"Rect"->React.string}
-      </button>
-      <button
-        className={[
-          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
-          ("bg-green-500 hover:bg-green-700", state.currFigure == #circle),
-          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #circle),
-        ]->Utils.className}
-        onClick={_ => dispatch(ChangeCurrFigure(#circle))}>
-        {"Circle"->React.string}
-      </button>
-      <button
-        className={[
-          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
-          ("bg-green-500 hover:bg-green-700", state.currFigure == #ellipse),
-          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #ellipse),
-        ]->Utils.className}
-        onClick={_ => dispatch(ChangeCurrFigure(#ellipse))}>
-        {"Ellipse"->React.string}
-      </button>
-      <button
-        className={[
-          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
-          ("bg-green-500 hover:bg-green-700", state.currFigure == #line),
-          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #line),
-        ]->Utils.className}
-        onClick={_ => dispatch(ChangeCurrFigure(#line))}>
-        {"Line"->React.string}
-      </button>
-      <button
-        className={[
-          ("block my-2 text-white font-bold py-2 px-4 rounded", true),
-          ("bg-green-500 hover:bg-green-700", state.currFigure == #polyline),
-          ("bg-blue-500 hover:bg-blue-700", state.currFigure != #polyline),
-        ]->Utils.className}
-        onClick={_ => dispatch(ChangeCurrFigure(#polyline))}>
-        {"Polyline"->React.string}
-      </button>
+      <ShapeBtn
+        isSelected={state.currFigure == #rect}
+        onClick={_ => dispatch(ChangeCurrFigure(#rect))}
+        label="Rect"
+      />
+      <ShapeBtn
+        isSelected={state.currFigure == #circle}
+        onClick={_ => dispatch(ChangeCurrFigure(#circle))}
+        label="Circle"
+      />
+      <ShapeBtn
+        isSelected={state.currFigure == #ellipse}
+        onClick={_ => dispatch(ChangeCurrFigure(#ellipse))}
+        label="Ellpise"
+      />
+      <ShapeBtn
+        isSelected={state.currFigure == #line}
+        onClick={_ => dispatch(ChangeCurrFigure(#line))}
+        label="Line"
+      />
+      <ShapeBtn
+        isSelected={state.currFigure == #polyline}
+        onClick={_ => dispatch(ChangeCurrFigure(#polyline))}
+        label="Polyline"
+      />
     </div>
     <div
       style={ReactDOMStyle.make(
