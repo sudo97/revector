@@ -12,7 +12,7 @@ type action =
   | Click(coords)
   | Move(coords)
   | Release
-  | EndCreation
+  | EnterPressed
   | ChangeMode(mode)
   | ChangeCurrFigure(figure)
 
@@ -105,7 +105,7 @@ let reducer = (currState: state, action: action) => {
     }
   | ChangeMode(mode) => {...currState, mode: mode}
   | ChangeCurrFigure(currFigure) => {...currState, currFigure: currFigure}
-  | EndCreation =>
+  | EnterPressed =>
     switch (mode, currFigure) {
     | (Create(asid), #polyline) => {
         ...currState,
@@ -142,7 +142,7 @@ let make = (~params) => {
     let handler = e => {
       open MyBindings
       if e.key == "Enter" {
-        dispatch(EndCreation)
+        dispatch(EnterPressed)
       }
     }
     MyBindings.addDocEventListener(. "keypress", handler)
