@@ -121,7 +121,7 @@ let reducer = (currState: state, action: action) => {
         }),
         mode: Idle,
       }
-    | _ => {...currState, mode: Idle}
+    | _ => currState
     }
   }
 }
