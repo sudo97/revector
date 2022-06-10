@@ -39,90 +39,108 @@ let constructor = (coords, fig) => {
   }
 }
 
-let reducer = (currState: state, action: action) => {
-  let {mode, currFigure} = currState
-  switch action {
-  | Click(x, y) =>
-    switch mode {
-    | Idle => {
-        let shape = (x, y)->constructor(currFigure)
-        {
-          ...currState,
-          mode: Create(shape.id),
-          shapes: currState.shapes->Js.Array2.concat([shape]),
-        }
+let clickReducer = (x, y, state) => {
+  let {mode, currFigure} = state
+  switch mode {
+  | Idle => {
+      let shape = (x, y)->constructor(currFigure)
+      {
+        ...state,
+        mode: Create(shape.id),
+        shapes: state.shapes->Js.Array2.concat([shape]),
       }
-    | Create(id) =>
-      switch currFigure {
-      | #polyline => {
-          ...currState,
-          shapes: currState.shapes->Js.Array2.map(item => {
-            if item.id == id {
-              (x, y)->Shapes.updShape(item)
-            } else {
-              item
-            }
-          }),
-        }
-      | _ => currState
-      }
-    | Selection(_) => failwith("Not implemented")
     }
-  | Move(x, y) =>
-    switch mode {
-    | Create(id) =>
-      switch currFigure {
-      | #polyline => {
-          ...currState,
-          shapes: currState.shapes->Js.Array2.map(item => {
-            if item.id == id {
-              (x, y)->Shapes.changePresence(item)
-            } else {
-              item
-            }
-          }),
-        }
-      | _ => {
-          ...currState,
-          shapes: currState.shapes->Js.Array2.map(item => {
-            if item.id == id {
-              (x, y)->Shapes.updShape(item)
-            } else {
-              item
-            }
-          }),
-        }
-      }
-    | Idle => currState
-    | Selection(_) => failwith("Not implemented")
-    }
-  | Release =>
-    switch (mode, currFigure) {
-    | (Create(_), #polyline) => currState
-    | (Create(_), _) => {...currState, mode: Idle}
-    | (Idle, _) => currState
-    | (Selection(_), _) => failwith("Not implemented")
-    }
-  | ChangeMode(mode) => {...currState, mode: mode}
-  | ChangeCurrFigure(currFigure) => {...currState, currFigure: currFigure}
-  | EnterPressed =>
-    switch (mode, currFigure) {
-    | (Create(asid), #polyline) => {
-        ...currState,
-        shapes: currState.shapes->Js.Array2.map((item: Shapes.t): Shapes.t => {
-          let {id} = item
-          switch item.shape {
-          | PolyVec(arr, fig) if id == asid => {
-              let arr = arr->Js.Array2.slice(~start=0, ~end_=arr->Js.Array2.length - 1)
-              {id: id, shape: PolyVec(arr, fig)}
-            }
-          | _ => item
+  | Create(id) =>
+    switch currFigure {
+    | #polyline => {
+        ...state,
+        shapes: state.shapes->Js.Array2.map(item => {
+          if item.id == id {
+            (x, y)->Shapes.updShape(item)
+          } else {
+            item
           }
         }),
-        mode: Idle,
       }
-    | _ => currState
+    | _ => state
     }
+  | Selection(_) => failwith("Not implemented")
+  }
+}
+
+let moveReducer = (x, y, state) => {
+  let {mode, currFigure} = state
+  switch mode {
+  | Create(id) =>
+    switch currFigure {
+    | #polyline => {
+        ...state,
+        shapes: state.shapes->Js.Array2.map(item => {
+          if item.id == id {
+            (x, y)->Shapes.changePresence(item)
+          } else {
+            item
+          }
+        }),
+      }
+    | _ => {
+        ...state,
+        shapes: state.shapes->Js.Array2.map(item => {
+          if item.id == id {
+            (x, y)->Shapes.updShape(item)
+          } else {
+            item
+          }
+        }),
+      }
+    }
+  | Idle => state
+  | Selection(_) => failwith("Not implemented")
+  }
+}
+
+let releaseReducer = state => {
+  let {mode, currFigure} = state
+  switch (mode, currFigure) {
+  | (Create(_), #polyline) => state
+  | (Create(_), _) => {...state, mode: Idle}
+  | (Idle, _) => state
+  | (Selection(_), _) => failwith("Not implemented")
+  }
+}
+
+let enterPressedReducer = state => {
+  let {mode, currFigure} = state
+  switch (mode, currFigure) {
+  | (Create(asid), #polyline) => {
+      ...state,
+      shapes: state.shapes->Js.Array2.map((item: Shapes.t): Shapes.t =>
+        switch item.shape {
+        | PolyVec(arr, fig) if item.id == asid => {
+            let arr = arr->Js.Array2.slice(~start=0, ~end_=arr->Js.Array2.length - 1)
+            {...item, shape: PolyVec(arr, fig)}
+          }
+        | _ => item
+        }
+      ),
+      mode: Idle,
+    }
+  | _ => state
+  }
+}
+
+let changeModeReducer = (mode, state) => {...state, mode: mode}
+
+let changeCurrFigureReducer = (currFigure, state) => {...state, currFigure: currFigure}
+
+let reducer = (state: state, action: action) => {
+  state->switch action {
+  | Click(x, y) => clickReducer(x, y)
+  | Move(x, y) => moveReducer(x, y)
+  | Release => releaseReducer
+  | ChangeMode(mode) => changeModeReducer(mode)
+  | ChangeCurrFigure(currFigure) => changeCurrFigureReducer(currFigure)
+  | EnterPressed => enterPressedReducer
   }
 }
 
