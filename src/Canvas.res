@@ -4,9 +4,9 @@ type canvasParams = {width: int, height: int}
 
 type coords = (int, int)
 
-type mode = Idle | Create(Shapes.id) | Selection(Shapes.id)
-
 type figure = [#circle | #rect | #ellipse | #line | #polyline | #polygon]
+
+type mode = Idle | Create(Shapes.id) | Selection(Shapes.id)
 
 type action =
   | Click(coords)
